@@ -126,6 +126,30 @@ docker run --rm -p 8080:8080 \
 # → http://localhost:8080
 ```
 
+## CI/CD (GitHub Actions)
+
+Two workflows run on push to `main`:
+
+- **`.github/workflows/ci.yml`** — installs PHP 8.3 + Node 22, runs `composer install`,
+  `npm ci`, `npm run build`, and `php artisan test` (in-memory SQLite), then builds
+  the `Dockerfile.vercel` image as a smoke test.
+- **`.github/workflows/deploy.yml`** — deploys to Vercel production with the Vercel CLI.
+  It uploads the source and lets Vercel build the container remotely (no Docker
+  needed in CI).
+
+To enable the deploy workflow, add these repository secrets
+(**Settings → Secrets and variables → Actions**):
+
+| Secret               | Value                                                                  |
+| -------------------- | ---------------------------------------------------------------------- |
+| `VERCEL_TOKEN`       | Create at vercel.com/account/tokens (or copy from `~/.local/share/com.vercel.cli/auth.json`) |
+| `VERCEL_ORG_ID`      | `team_...` from `.vercel/project.json`                                 |
+| `VERCEL_PROJECT_ID`  | `prj_...` from `.vercel/project.json`                                  |
+
+> Prefer the simpler route? Connect the repo to Vercel from the dashboard
+> (**Project → Settings → Git**) and Vercel deploys every push automatically —
+> then you can delete `deploy.yml` to avoid double deploys.
+
 ## Troubleshooting
 
 - **502 Bad Gateway** — Caddy isn't listening on Vercel's port. Keep `:{$PORT:80}` in the `Caddyfile`; don't hardcode a port.
