@@ -126,16 +126,20 @@ docker run --rm -p 8080:8080 \
 # → http://localhost:8080
 ```
 
-## CI/CD (GitHub Actions)
+## Branch strategy & CI/CD
 
-Two workflows run on push to `main`:
+Two branches, one rule: **only `production` deploys to Vercel.** `main` is for
+development; `production` is the deploy source. The Vercel project's production
+branch is set to `production`, and the deploy workflow only triggers there.
 
-- **`.github/workflows/ci.yml`** — installs PHP 8.3 + Node 22, runs `composer install`,
-  `npm ci`, `npm run build`, and `php artisan test` (in-memory SQLite), then builds
-  the `Dockerfile.vercel` image as a smoke test.
-- **`.github/workflows/deploy.yml`** — deploys to Vercel production with the Vercel CLI.
-  It uploads the source and lets Vercel build the container remotely (no Docker
-  needed in CI).
+Workflows:
+
+- **`.github/workflows/ci.yml`** — runs on push/PR to `main` and `production`: PHP 8.3 + Node 22,
+  `composer install`, `npm ci`, `npm run build`, `php artisan test` (in-memory
+  SQLite), then builds the `Dockerfile.vercel` image as a smoke test.
+- **`.github/workflows/deploy.yml`** — deploys to Vercel production with the Vercel CLI,
+  but **only on push to `production`**. It uploads the source and lets Vercel
+  build the container remotely (no Docker needed in CI).
 
 To enable the deploy workflow, add these repository secrets
 (**Settings → Secrets and variables → Actions**):
