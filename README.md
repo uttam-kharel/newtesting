@@ -129,8 +129,12 @@ docker run --rm -p 8080:8080 \
 ## Branch strategy & CI/CD
 
 Two branches, one rule: **only `production` deploys to Vercel.** `main` is for
-development; `production` is the deploy source. The Vercel project's production
-branch is set to `production`, and the deploy workflow only triggers there.
+development; `production` is the deploy source. Deployment runs through the
+GitHub Actions workflow, which only triggers on pushes to `production`.
+
+> If you later connect the repo to Vercel's native Git integration, set
+> **Project → Settings → Git → Production Branch** to `production` so it
+> doesn't auto-deploy from `main`.
 
 Workflows:
 
