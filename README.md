@@ -110,6 +110,22 @@ For local container previews against the real Vercel env:
 vercel dev -L
 ```
 
+### Custom domain (Cloudflare DNS)
+
+The production URL is **https://v1.api.khareluttam.com.np** (with
+`www.v1.api.khareluttam.com.np` redirecting to it). Both hostnames are already
+registered on the Vercel project and `APP_URL` points at the domain.
+
+Point DNS at Vercel from the Cloudflare dashboard (zone `khareluttam.com.np`):
+
+| Type  | Name          | Target                 | Proxy  |
+| ----- | ------------- | ---------------------- | ------ |
+| CNAME | `v1.api`      | `cname.vercel-dns.com` | ON     |
+| CNAME | `www.v1.api`  | `cname.vercel-dns.com` | ON     |
+
+Vercel issues and terminates HTTPS automatically at the edge (and Cloudflare
+proxies over it), so both hostnames serve over TLS once DNS propagates.
+
 ### Testing the container locally
 
 ```bash
