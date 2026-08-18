@@ -89,6 +89,9 @@ Two deliberate decisions:
    ```
 5. Deploy. The first request to a cold instance runs migrations automatically.
 
+> Full environment-variable reference (manual vars + everything the Neon
+> integration injects) is in [`DEPLOYMENT.md`](DEPLOYMENT.md).
+
 ### Option B — Vercel CLI
 
 ```bash

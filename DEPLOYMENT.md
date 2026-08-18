@@ -464,6 +464,70 @@ Confirm in the deployment logs (`npx vercel logs <deploy-url>`) that migrations
 ran, and check the tables landed in Neon (`notes`, `users`, `sessions`, `cache`,
 `jobs`, `migrations`).
 
+### Environment variables — the complete reference
+
+#### Manually set on Vercel (`vercel env add` / dashboard)
+
+Add these to **Production, Preview, and Development**:
+
+| Variable | Example value | Purpose |
+| -------- | ------------- | ------- |
+| `APP_KEY` | `base64:...` | Laravel encryption key — generate with `php artisan key:generate --show`. Required for sessions, cookies, signed URLs. |
+| `APP_ENV` | `production` | Environment name. |
+| `APP_DEBUG` | `false` | Never `true` in production. |
+| `APP_URL` | `https://v1.api.example.com.np` | Canonical base URL for URL generation. |
+| `DB_CONNECTION` | `pgsql` | Forces Postgres. Without it Laravel silently falls back to SQLite (see the §5 gotcha). |
+
+#### Auto-injected by the Neon integration (all three environments)
+
+`npx vercel integration add neon` provisions the database and sets these.
+**The app only reads `DATABASE_URL`** — the rest exists for other frameworks
+and tools:
+
+| Variable | Purpose |
+| -------- | ------- |
+| `DATABASE_URL` | Pooled connection string (`...-pooler...?sslmode=require`) — **what Laravel uses** |
+| `DATABASE_URL_UNPOOLED` | Direct (non-pooled) connection string |
+| `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING`, `POSTGRES_URL_NO_SSL`, `POSTGRES_PRISMA_URL` | Same database in other forms (Prisma, non-SSL, …) |
+| `PGHOST`, `PGHOST_UNPOOLED`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | libpq-style component variables |
+| `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DATABASE` | Component variables (framework-agnostic) |
+| `NEON_PROJECT_ID` | Neon project identifier |
+| `NEON_AUTH_BASE_URL`, `VITE_NEON_AUTH_URL` | Neon Auth preview feature — not used by this app |
+
+#### What the app actually reads
+
+`DATABASE_URL`, `DB_CONNECTION`, `APP_KEY`, `APP_ENV`, `APP_DEBUG`, `APP_URL`.
+Sessions, cache, and the queue default to the `database` driver, so they all
+share the Neon database.
+
+#### Local development `.env` (`cp .env.example .env`)
+
+```
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=            # php artisan key:generate
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=pgsql
+DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=
+DB_SSLMODE=require
+
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+```
+
+> `.env` is never copied into the Docker image (see `.dockerignore`). Every
+> value reaches the app through Vercel's environment variables at container
+> runtime, and the entrypoint rebuilds the config cache on boot
+> (`php artisan optimize`) so the runtime values always win.
+
 ## 11. Custom domain + Cloudflare DNS + HTTPS
 
 ### Register the hostnames on Vercel
