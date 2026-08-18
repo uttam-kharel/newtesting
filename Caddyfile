@@ -1,0 +1,8 @@
+# FrankenPHP (Caddy) config for Vercel containers.
+# Listens on Vercel's $PORT (falling back to 80) on all interfaces; Vercel
+# terminates TLS at the edge, so no certificates are needed here.
+:{$PORT:80} {
+	root * /app/public
+	encode zstd gzip
+	php_server
+}

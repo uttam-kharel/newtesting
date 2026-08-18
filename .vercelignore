@@ -1,0 +1,15 @@
+.git
+.freebuff
+.env
+.env.*
+!.env.example
+node_modules
+vendor
+public/build
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+database/database.sqlite
+bootstrap/cache/*.php
