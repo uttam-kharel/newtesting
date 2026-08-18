@@ -121,10 +121,14 @@ registered on the Vercel project and `APP_URL` points at the domain.
 
 Point DNS at Vercel from the Cloudflare dashboard (zone `khareluttam.com.np`):
 
-| Type  | Name          | Target                 | Proxy  |
-| ----- | ------------- | ---------------------- | ------ |
-| CNAME | `v1.api`      | `cname.vercel-dns.com` | ON     |
-| CNAME | `www.v1.api`  | `cname.vercel-dns.com` | ON     |
+| Type  | Name          | Target                 | Proxy     |
+| ----- | ------------- | ---------------------- | --------- |
+| CNAME | `v1.api`      | `cname.vercel-dns.com` | ON        |
+| CNAME | `www.v1.api`  | `cname.vercel-dns.com` | **DNS only** |
+
+> `www.v1.api` must be DNS-only: Cloudflare's Universal SSL only covers one
+> wildcard level, so a three-level subdomain has no Cloudflare cert when proxied.
+> DNS-only resolves it to Vercel, which has the cert (it just 307s to the apex).
 
 Vercel issues and terminates HTTPS automatically at the edge (and Cloudflare
 proxies over it), so both hostnames serve over TLS once DNS propagates.

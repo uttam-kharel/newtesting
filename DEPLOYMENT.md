@@ -550,18 +550,23 @@ Update `APP_URL` to `https://v1.api.example.com.np` (rm then add).
 
 In Cloudflare (zone `example.com.np`) → **DNS → Records → Add record**:
 
-| Type  | Name         | Content (Target)       | Proxy | TTL  |
-| ----- | ------------ | ---------------------- | ----- | ---- |
-| CNAME | `v1.api`     | `cname.vercel-dns.com` | ON ☁️  | Auto |
-| CNAME | `www.v1.api` | `cname.vercel-dns.com` | ON ☁️  | Auto |
+| Type  | Name         | Content (Target)       | Proxy    | TTL  |
+| ----- | ------------ | ---------------------- | -------- | ---- |
+| CNAME | `v1.api`     | `cname.vercel-dns.com` | ON ☁️     | Auto |
+| CNAME | `www.v1.api` | `cname.vercel-dns.com` | **DNS only** ☁️→⬜ | Auto |
 
 Notes:
 
 - The **Name** field is the subdomain only — Cloudflare appends the zone.
 - **Proxied (orange cloud)** keeps Cloudflare's edge in front; Vercel terminates
   TLS at its own edge, so HTTPS works with zero certificate setup.
+- **`www.v1.api` must be DNS-only (grey cloud).** Cloudflare's Universal SSL
+  only covers one wildcard level (`*.khareluttam.com.np`), so the three-level
+  `www.v1.api...` has no Cloudflare cert and fails the TLS handshake when
+  proxied. As DNS-only it resolves straight to Vercel, which *does* have a cert
+  for it (and it only exists to 307-redirect to the apex anyway).
 - No TXT records or nameserver changes needed.
-- `www.v1.api...` 301-redirects to the apex automatically (set on Vercel).
+- `www.v1.api...` redirects to the apex automatically (set on Vercel).
 
 Propagation takes minutes. Verify with `nslookup v1.api.example.com.np` and by
 opening `https://v1.api.example.com.np`.
@@ -575,6 +580,7 @@ opening `https://v1.api.example.com.np`.
 | `Class "Laravel\Pail\PailServiceProvider" not found` at build | Stale local `bootstrap/cache/*.php` copied into image | Exclude in `.dockerignore` |
 | Migrations "succeed" but Neon is empty | `DB_CONNECTION` unset → Laravel used SQLite in ephemeral disk | Set `DB_CONNECTION=pgsql`; auto-select pgsql when `DATABASE_URL` exists |
 | 302 to vercel.com/sso-api | Vercel deployment protection on `*.vercel.app` | Expected; custom domain is public |
+| Apex works but `www` fails with a TLS handshake error | Cloudflare Universal SSL doesn't cover three-level subdomains | Set the `www.v1.api` record to **DNS only** so it resolves to Vercel's cert |
 | `vercel env add` "already exists" | Env vars can't be overwritten | `vercel env rm NAME <env> --yes` first |
 | `vercel env add ... preview` hangs on a branch prompt | CLI expects interactive input | Add interactively or skip (previews use their own URLs) |
 
