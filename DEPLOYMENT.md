@@ -22,7 +22,7 @@ Cloudflare DNS  ── CNAME ──►  cname.vercel-dns.com
                         Vercel edge (TLS termination)
                                    ▼
                  Vercel Fluid compute container (FrankenPHP + Caddy)
-                                   │  php artisan migrate + optimize on boot
+                                   │  php artisan migrate on boot
                                    ▼
                         Neon serverless Postgres (free tier)
 ```
@@ -271,9 +271,9 @@ until php artisan migrate --force --no-interaction; do
     sleep 2
 done
 
-# Rebuild caches with the *runtime* environment (config is not cached at build).
-php artisan optimize
-
+# View/event caches are prebuilt into the image at build time (env-independent).
+# Config is NOT cached — Vercel injects env vars at runtime and Laravel reads
+# them directly, which is always correct and keeps cold starts to one command.
 exec "$@"
 ```
 
@@ -525,8 +525,8 @@ QUEUE_CONNECTION=database
 
 > `.env` is never copied into the Docker image (see `.dockerignore`). Every
 > value reaches the app through Vercel's environment variables at container
-> runtime, and the entrypoint rebuilds the config cache on boot
-> (`php artisan optimize`) so the runtime values always win.
+> runtime, and config is read from those env vars directly (no config cache), so
+> the runtime values always win.
 
 ## 11. Custom domain + Cloudflare DNS + HTTPS
 

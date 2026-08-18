@@ -21,15 +21,11 @@ until php artisan migrate --force --no-interaction; do
 done
 
 # ---------------------------------------------------------------------------
-# 2. Rebuild Laravel's caches with the *runtime* environment.
+# 2. Hand off to FrankenPHP.
 #
-#    Config is intentionally not cached at build time because Vercel injects
-#    environment variables when the container starts. Container storage is
-#    ephemeral, so regenerating on each boot is cheap and always in sync.
-# ---------------------------------------------------------------------------
-php artisan optimize
-
-# ---------------------------------------------------------------------------
-# 3. Hand off to FrankenPHP.
+#    View/event caches are prebuilt into the image at build time (they are
+#    env-independent). Config is intentionally NOT cached: Vercel injects env
+#    vars at runtime and Laravel reads them directly, which is always correct.
+#    Keeping the boot path to a single artisan call makes cold starts faster.
 # ---------------------------------------------------------------------------
 exec "$@"

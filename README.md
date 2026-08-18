@@ -60,7 +60,7 @@ These files implement the official container model:
   2. `assets` — Vite/Tailwind production build
   3. `runtime` — FrankenPHP with `pdo_pgsql`/`pgsql`, running as a non-root user
 - **`Caddyfile`** — serves `/app/public` and binds FrankenPHP to Vercel's `$PORT`
-- **`entrypoint.sh`** — runs `php artisan migrate --force` (with retries for Neon cold starts), rebuilds Laravel's caches with the *runtime* env (`php artisan optimize`), then starts FrankenPHP
+- **`entrypoint.sh`** — runs `php artisan migrate --force` (with retries for Neon cold starts), then starts FrankenPHP. View/event caches are prebuilt into the image; config is read from runtime env directly so cold starts stay fast
 - **`vercel.json`** — declares the `container` service and a catch-all rewrite to it
 - **`.dockerignore`** — keeps `.env`, local caches, and build artifacts out of the image
 
@@ -186,4 +186,4 @@ To enable the deploy workflow, add these repository secrets
 - **502 Bad Gateway** — Caddy isn't listening on Vercel's port. Keep `:{$PORT:80}` in the `Caddyfile`; don't hardcode a port.
 - **404 on everything** — the document root isn't pointing at `public`. Keep `root * /app/public` + `php_server`.
 - **`could not find driver (pgsql)`** — the image is missing `pdo_pgsql`; it's installed via `install-php-extensions pdo_pgsql pgsql` in `Dockerfile.vercel`.
-- **Stale code after deploy** — framework caches regenerate on boot (`php artisan optimize`), and `.dockerignore` keeps local `bootstrap/cache` out of the image, so a fresh deploy always boots clean.
+- **Stale code after deploy** — view/event caches are rebuilt at image build time, and `.dockerignore` keeps local `bootstrap/cache` out of the image, so a fresh deploy always boots clean.
