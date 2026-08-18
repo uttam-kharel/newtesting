@@ -12,7 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->trustProxies(at: [
+            'REMOTE_ADDR',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED_HOST',
+            'HTTP_X_FORWARDED_PROTO',
+            'HTTP_X_FORWARDED_PORT',
+            'HTTP_X_FORWARDED_PREFIX',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
