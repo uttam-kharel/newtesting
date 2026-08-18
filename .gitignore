@@ -34,5 +34,8 @@ Thumbs.db
 # Local SQLite dev database
 /database/database.sqlite
 
-# Freebuff agent workspace
+# Agent/editor tooling workspace
 .freebuff
+.agents
+.claude
+skills-lock.json
